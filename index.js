@@ -18,7 +18,7 @@ const PORT = 5000;
 
 
 app.get('/', (req, res) => {
-    console.log('')
+    console.log('') 
     res.json({msg: "Your api call is successfully completed!"});
 })
 
@@ -52,6 +52,29 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
            })
         })
 
+
+         // Add a Service
+         app.post('/addAService', (req, res) => {
+            console.log(req.files.imgFile);
+            const imgFile = req.files.imgFile;
+            const newImg = imgFile.data;
+            const encImg = newImg.toString('base64');
+
+            const image = {
+                contentType: imgFile.mimetype,
+                size: imgFile.size,
+                img: Buffer.from(encImg, 'base64')
+            }
+            // console.log(image);
+            const {title, description} = req.body;
+
+            services.insertOne({title, description, image})
+            .then(result => {
+                console.log(result.insertedCount);
+                res.send(result.insertedCount > 0);
+            })
+        })
+
         // Getting feedbacks from db and sending to the FrontEnd
         app.get('/feedbacks', (req, res) => {
             feedbacks.find({}).sort({_id: -1}).limit(6)
@@ -74,11 +97,12 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
                 size: imgFile.size,
                 img: Buffer.from(encImg, 'base64')
             }
-            console.log(image);
-            const {name, email, description, price} = req.body;
+            // console.log(image);
+            const {name, email, description, price, serviceName, status} = req.body;
 
-            orderList.insertOne({name, email, description, price, image})
+            orderList.insertOne({name, email,serviceName, description, price, image, status})
             .then(result => {
+                console.log(result.insertedCount);
                 res.send(result.insertedCount > 0);
             })
         })
@@ -86,6 +110,17 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
         // Find all the orders
         app.get('/orders', (req, res) => {
             orderList.find({})
+            .toArray((err, documents) => {
+                console.log(documents);
+                res.send(documents);
+            })
+        })
+       
+
+        // Find User Specific orders
+        app.post('/userOrders', (req, res) => {
+            console.log(req.body.email)
+            orderList.find({email: req.body.email})
             .toArray((err, documents) => {
                 console.log(documents);
                 res.send(documents);
@@ -106,21 +141,26 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
                 res.send(result.insertedCount > 0);
             })
         })
+       
 
         // Make Admin
         app.post('/makeAdmin', (req, res) => {
+            dbAdmins.insertOne({email: req.body.email})
+            .then(result => {
+                res.send(result.insertedCount > 0);
+                console.log('Admin Added Successfully!', result.insertedCount > 0);
+            })
             console.log(req.body.email);
         })
 
         // Check admin
         app.post('/isAdmin', (req,  res) => {
-            // console.log(req.body.email);
-            // dbAdmins.find({})
-            // .then(result => console.log(result));
-            dbAdmins.find({email: req.body.email})
-            .toArray((err, admins) => {
-                console.log('isAdmin', admins.length > 0);
-                res.send(admins.length > 0);
+            console.log(req.body.email);
+            console.log(req.body);
+            dbAdmins.find({email:req.body.email})
+            .toArray((err, admin) => {
+                console.log(admin.length > 0);
+                res.send(admin.length > 0);
             })
         })
     
