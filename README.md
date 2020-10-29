@@ -10,6 +10,11 @@ They provide quality services from Graphics design, logo design to website build
     - Admin can create new Services, See all the pending orders, Update status and more.
     - Secure Authentication system.
 
+## Tools and Technology
+
+<b>React, React Router, Bootstrap, Node.js, Express.js, MongoDB atlas,
+Firebase.<b>
+
 ## Resources
 
 Website: [Live Here](https://creative-agency-e16ba.web.app/) <br>
